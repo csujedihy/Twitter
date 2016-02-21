@@ -36,7 +36,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UINavigationBar.appearance().tintColor = UIColor.whiteColor()
         UINavigationBar.appearance().alpha = 0.8
         UINavigationBar.appearance().translucent = true
-        UIActivityIndicatorView.appearance().color = UIColor.whiteColor()
         
         return true
     }

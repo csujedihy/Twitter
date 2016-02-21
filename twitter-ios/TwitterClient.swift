@@ -28,13 +28,11 @@ class TwitterClient: BDBOAuth1SessionManager {
     func unretweet(tweetid: String, completion: (error: NSError?)->()) {
         TwitterClient.sharedInstance.POST("1.1/statuses/unretweet/\(tweetid).json", parameters: nil, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
             
-            print("Un-Retweeted!")
             completion(error: nil)
             
-            }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
+        }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
                 
-                print("Un-Retweet failed")
-                completion(error: error)
+            completion(error: error)
                 
         })
     }
@@ -43,12 +41,12 @@ class TwitterClient: BDBOAuth1SessionManager {
     //
         TwitterClient.sharedInstance.POST("1.1/statuses/update.json?status=\(content)", parameters: nil, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
             
-            print("New Tweet Posted!")
+//            print("New Tweet Posted!")
             completion?(error: nil)
             
         }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
                 
-            print("Failed to post New Tweet!")
+//            print("Failed to post New Tweet!")
             completion?(error: error)
                 
         })
@@ -59,12 +57,12 @@ class TwitterClient: BDBOAuth1SessionManager {
     func retweet(tweetid: String, completion: (error: NSError?)->()) {
         TwitterClient.sharedInstance.POST("1.1/statuses/retweet/\(tweetid).json", parameters: nil, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
             
-                print("Retweeted!")
+//                print("Retweeted!")
                 completion(error: nil)
             
             }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
                 
-                print("Retweet failed")
+//                print("Retweet failed")
                 completion(error: error)
                 
         })
@@ -125,10 +123,17 @@ class TwitterClient: BDBOAuth1SessionManager {
     }
     
     
-    func homeTimeline(success: ([Tweet]) -> (), failure: (NSError) -> ()) {
-    
-        TwitterClient.sharedInstance.GET("1.1/statuses/home_timeline.json", parameters: nil, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
-            //                print("user:\(response)")
+    func homeTimeline(count: Int?, since: Int?, success: ([Tweet]) -> (), failure: (NSError) -> ()) {
+        var parameters = [String : AnyObject]()
+        if let count = count {
+            parameters["count"] = String(count)
+        }
+        
+        if let since = since {
+            parameters["since_id"] = String(since)
+        }
+        
+        TwitterClient.sharedInstance.GET("1.1/statuses/home_timeline.json", parameters: parameters, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
             var tweets = Tweet.tweetsWithArray(response as! [NSDictionary])
             success(tweets)
 

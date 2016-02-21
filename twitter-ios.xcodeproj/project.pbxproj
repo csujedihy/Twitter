@@ -21,6 +21,7 @@
 		C1C163611C7928A80062A403 /* TweetCellTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C163601C7928A80062A403 /* TweetCellTableViewCell.swift */; };
 		C1C163631C796A750062A403 /* NewPostViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C163621C796A750062A403 /* NewPostViewController.swift */; };
 		C1C163651C7999AE0062A403 /* RoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C163641C7999AE0062A403 /* RoundedButton.swift */; };
+		C1C163691C79AF300062A403 /* InfiniteScrollActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1C163681C79AF300062A403 /* InfiniteScrollActivityView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +43,7 @@
 		C1C163601C7928A80062A403 /* TweetCellTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TweetCellTableViewCell.swift; sourceTree = "<group>"; };
 		C1C163621C796A750062A403 /* NewPostViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NewPostViewController.swift; sourceTree = "<group>"; };
 		C1C163641C7999AE0062A403 /* RoundedButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RoundedButton.swift; sourceTree = "<group>"; };
+		C1C163681C79AF300062A403 /* InfiniteScrollActivityView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InfiniteScrollActivityView.swift; sourceTree = "<group>"; };
 		CDFEE9699EF172E28A39ADDE /* Pods-twitter-ios.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-twitter-ios.debug.xcconfig"; path = "Pods/Target Support Files/Pods-twitter-ios/Pods-twitter-ios.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -142,6 +144,7 @@
 				C1C1635E1C7928150062A403 /* RoundedImage.swift */,
 				C1C163601C7928A80062A403 /* TweetCellTableViewCell.swift */,
 				C1C163641C7999AE0062A403 /* RoundedButton.swift */,
+				C1C163681C79AF300062A403 /* InfiniteScrollActivityView.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -274,6 +277,7 @@
 				C15D0A7B1C72B1F2005FB003 /* Tweet.swift in Sources */,
 				C1C1635F1C7928150062A403 /* RoundedImage.swift in Sources */,
 				C1C163611C7928A80062A403 /* TweetCellTableViewCell.swift in Sources */,
+				C1C163691C79AF300062A403 /* InfiniteScrollActivityView.swift in Sources */,
 				C1C1635C1C7904F00062A403 /* TweetsViewController.swift in Sources */,
 				C1C163631C796A750062A403 /* NewPostViewController.swift in Sources */,
 				C15D0A621C728496005FB003 /* LoginViewController.swift in Sources */,

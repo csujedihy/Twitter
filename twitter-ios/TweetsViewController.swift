@@ -8,10 +8,14 @@
 
 import UIKit
 
-class TweetsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
+class TweetsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
 
     var tweets = [Tweet]()
+    var pageOffset = 0
     var refreshControl: UIRefreshControl?
+    var isMoreDataLoading = false
+    var loadingMoreView:InfiniteScrollActivityView?
+    
     @IBOutlet weak var tableView: UITableView!
     
     @IBAction func logoutOnTap(sender: AnyObject) {
@@ -76,9 +80,25 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         
     }
     
+    func fetchTweets(count: Int, since: Int) {
+        TwitterClient.sharedInstance.homeTimeline(count, since: since, success: { (tweets: [Tweet]) -> () in
+            self.tweets += tweets
+            self.pageOffset += tweets.count
+            self.tableView.reloadData()
+            self.isMoreDataLoading = false
+            self.loadingMoreView?.stopAnimating()
+            self.refreshControl?.endRefreshing()
+            }) { (error: NSError) -> () in
+                print(error.localizedDescription)
+                
+        }
+    }
+    
     func fetchTweets() {
-        TwitterClient.sharedInstance.homeTimeline({ (tweets: [Tweet]) -> () in
+        TwitterClient.sharedInstance.homeTimeline(5, since: nil, success: { (tweets: [Tweet]) -> () in
+            self.pageOffset = 0
             self.tweets = tweets
+            self.pageOffset = tweets.count
             self.tableView.reloadData()
             self.refreshControl?.endRefreshing()
             }) { (error: NSError) -> () in
@@ -87,12 +107,40 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         }
     }
     
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if (!isMoreDataLoading) {
+            // Calculate the position of one screen length before the bottom of the results
+            let scrollViewContentHeight = tableView.contentSize.height
+            let scrollOffsetThreshold = 50 + scrollViewContentHeight - tableView.bounds.size.height
+            
+            // When the user has scrolled past the threshold, start requesting
+            if(scrollView.contentOffset.y > scrollOffsetThreshold && tableView.dragging) {
+                isMoreDataLoading = true
+                
+                // Update position of loadingMoreView, and start loading indicator
+                let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
+                loadingMoreView?.frame = frame
+                loadingMoreView!.startAnimating()
+                
+                fetchTweets(20, since: pageOffset)
+                
+                // Code to load more results
+//                loadMoreData()		
+            }
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+        
         tableView.estimatedRowHeight = 100
         tableView.rowHeight = UITableViewAutomaticDimension
+        
+        
+        
         refreshControl = UIRefreshControl()
         refreshControl!.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl!, atIndex: 0)
@@ -103,6 +151,19 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
             self.tableView.reloadData()
         }
 
+        
+        // infinite scrolling
+        let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
+        loadingMoreView = InfiniteScrollActivityView(frame: frame)
+        loadingMoreView!.hidden = true
+        tableView.addSubview(loadingMoreView!)
+        
+        var insets = tableView.contentInset;
+        insets.bottom += InfiniteScrollActivityView.defaultHeight;
+        tableView.contentInset = insets
+        
+        
+        
         // Do any additional setup after loading the view.
     }
     
@@ -151,7 +212,7 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
 
                 let imageRetweeted = UIImage(named: "retweet-action")
                 cell.retweetButton.setImage(imageRetweeted, forState: .Normal)
-                print("text \(cell.tweetTextLabel?.text) set retweet grey image false")
+//                print("text \(cell.tweetTextLabel?.text) set retweet grey image false")
 
             }
         }
