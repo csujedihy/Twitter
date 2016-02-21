@@ -95,7 +95,7 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func fetchTweets() {
-        TwitterClient.sharedInstance.homeTimeline(5, since: nil, success: { (tweets: [Tweet]) -> () in
+        TwitterClient.sharedInstance.homeTimeline(20, since: nil, success: { (tweets: [Tweet]) -> () in
             self.pageOffset = 0
             self.tweets = tweets
             self.pageOffset = tweets.count
