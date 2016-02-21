@@ -69,7 +69,7 @@ class TweetCellTableViewCell: UITableViewCell {
     func minusOneToLikeNum() {
         if let tweet = tweet {
             tweet.likeNumber = tweet.likeNumber! - 1
-            tweet.liked = true
+            tweet.liked = false
             likedNumberLabel.text = String(tweet.likeNumber!)
             let imageLiked = UIImage(named: "like-action")
             likeButton.setImage(imageLiked, forState: .Normal)
