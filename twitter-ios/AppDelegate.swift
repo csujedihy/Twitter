@@ -17,6 +17,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
         // Override point for customization after application launch.
+        if User.currentUser == nil {
+            print("there is not current user")
+        } else {
+            print("there is a current user")
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateViewControllerWithIdentifier("TweetsNavController")
+            self.window?.rootViewController = vc
+        }
+        
+        NSNotificationCenter.defaultCenter().addObserverForName(TwitterClient.userDidLogoutNotification, object: nil, queue: NSOperationQueue.mainQueue()) { (NSNotification) -> Void in
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let vc = storyboard.instantiateInitialViewController()
+            self.window?.rootViewController = vc
+        }
+        
+        UINavigationBar.appearance().barTintColor = UIColor(red: 29/255, green: 142/255, blue: 238/255, alpha: 1.0)
+        UINavigationBar.appearance().tintColor = UIColor.whiteColor()
+        UINavigationBar.appearance().alpha = 0.8
+        UINavigationBar.appearance().translucent = true
+        UIActivityIndicatorView.appearance().color = UIColor.whiteColor()
+        
         return true
     }
 
@@ -43,21 +64,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func application(application: UIApplication, openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
-        print(url)
-        TwitterClient.sharedInstance.fetchAccessTokenWithPath("oauth/access_token", method: "POST", requestToken: BDBOAuth1Credential(queryString: url.query), success: { (accessToken: BDBOAuth1Credential!) -> Void in
-                print("Got access Token \(url.query)")
-                TwitterClient.sharedInstance.requestSerializer.saveAccessToken(accessToken)
-            TwitterClient.sharedInstance.GET("1.1/account/verify_credentials.json", parameters: nil, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
-                print("user:\(response)")
-            
-                }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
-
-            
-            })
-            
-            }) { (error: NSError!) -> Void in
-                print("Failed to receive access Token")
-        }
+        TwitterClient.sharedInstance.openURL(url)
         return true
     }
 }
