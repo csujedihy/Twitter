@@ -16,15 +16,25 @@ class NewPostViewController: UIViewController, UITextViewDelegate {
     
     @IBOutlet weak var tweetButton: UIBarButtonItem!
     
+    @IBOutlet weak var nameLabel: UILabel!
+    @IBOutlet weak var screenName: UILabel!
+    @IBOutlet weak var avatarImageView: AvatarImageView!
+    
+    @IBOutlet weak var charCountLabel: UIBarButtonItem!
+    @IBOutlet weak var inReplyToLabel: UILabel!
+    @IBOutlet weak var inReplyIcon: UIButton!
+    
+    var inReplyToId: String?
+    var tweet: Tweet?
     var placeholderLabel: UILabel!
     var removedState = 0
+    var remainedLength = TwitterClient.tweetMaxLength
     
     
     @IBAction func newTweetOnTap(sender: AnyObject) {
         if let content = tweetContent.text {
-            let customAllowedSet =  NSCharacterSet(charactersInString:"=\"#%/<>?@\\^`{|}").invertedSet
-            let escapedString = content.stringByAddingPercentEncodingWithAllowedCharacters(customAllowedSet)
-            TwitterClient.sharedInstance.newTweet(escapedString!) {
+            let escapedString = content.stringByAddingPercentEncodingWithAllowedCharacters(.URLHostAllowedCharacterSet())
+            TwitterClient.sharedInstance.newTweet(escapedString!, replyId: inReplyToId) {
                 (error: NSError?) -> () in
                 self.dismissViewControllerAnimated(true) {
                     NSNotificationCenter.defaultCenter().postNotificationName(TwitterClient.userDidPostTweet, object: nil)
@@ -56,7 +66,20 @@ class NewPostViewController: UIViewController, UITextViewDelegate {
 
         }
     }
+    
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+        if range.location >= TwitterClient.tweetMaxLength {
+            
+            return false
+            
+        }
 
+        charCountLabel.title = String(TwitterClient.tweetMaxLength - (range.location + 1))
+        return true
+        
+    }
+    
+    
     override func becomeFirstResponder() -> Bool {
         self.toolBar.removeFromSuperview()
         return true
@@ -65,6 +88,24 @@ class NewPostViewController: UIViewController, UITextViewDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        inReplyIcon.alpha = 0
+        inReplyToLabel.alpha = 0
+        if let inReplyToId = inReplyToId {
+            print(inReplyToId)
+            inReplyIcon.alpha = 1
+            inReplyToLabel.alpha = 1
+            if let tweet = tweet {
+                inReplyToLabel.text = "In reply to \(tweet.user!.name!)"
+                tweetContent.text = "@\(tweet.user!.screenName!) "
+            }
+            
+        }
+        
+        if let me = User.currentUser {
+            avatarImageView.setImageWithURL(me.profileImageUrl!)
+            screenName.text = me.screenName
+            nameLabel.text = me.name
+        }
         
         tweetContent.inputAccessoryView = self.toolBar
         tweetContent.delegate = self

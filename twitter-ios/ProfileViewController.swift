@@ -219,7 +219,7 @@ class ProfileViewController: UIViewController, UIScrollViewDelegate, UITableView
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
-        
+        cell.selectionStyle = .None
         
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
@@ -328,6 +328,9 @@ class ProfileViewController: UIViewController, UIScrollViewDelegate, UITableView
                 let headerSizevariation = ((header.bounds.height * (1.0 + headerScaleFactor)) - header.bounds.height)/2.0
                 headerTransform = CATransform3DTranslate(headerTransform, 0, headerSizevariation, 0)
                 headerTransform = CATransform3DScale(headerTransform, 1.0 + headerScaleFactor, 1.0 + headerScaleFactor, 0)
+                //  ------------ Blur
+                
+                headerBlurImageView?.alpha = min (1.0, (-offset/40))
                 
                 header.layer.transform = headerTransform
             }

@@ -16,6 +16,7 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     var isMoreDataLoading = false
     var loadingMoreView:InfiniteScrollActivityView?
     
+    @IBOutlet weak var newPostButton: UIBarButtonItem!
     @IBOutlet weak var tableView: UITableView!
     
     @IBAction func logoutOnTap(sender: AnyObject) {
@@ -23,6 +24,17 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         
     }
     
+    
+    func replyOnTap(sender: AnyObject) {
+        let button = sender as! UIButton
+        let index = button.tag
+        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as! TweetCell
+        if let replyTweet = cell.tweet {
+            performSegueWithIdentifier("newPostSegue", sender: replyTweet)
+        }
+    
+    
+    }
 
     func retweetOnTap(sender: AnyObject) {
         let button = sender as! UIButton
@@ -184,7 +196,7 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     
     //MARK: tableView configuration
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        performSegueWithIdentifier("detailSegue", sender: nil)
+        performSegueWithIdentifier("detailSegue", sender: indexPath.row)
     }
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -204,7 +216,7 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
-        
+        cell.selectionStyle = .None
         
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
@@ -225,9 +237,12 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         
         cell.retweetButton.tag = indexPath.row
         cell.likeButton.tag = indexPath.row
+        cell.replyButton.tag = indexPath.row
         
         //MARK: programmatically set button's action
-        
+//        cell.replyBut
+        cell.replyButton.removeTarget(self, action: nil, forControlEvents: .AllEvents)
+        cell.replyButton.addTarget(self, action: "replyOnTap:", forControlEvents: .TouchUpInside)
         cell.retweetButton.removeTarget(self, action: nil, forControlEvents: .AllEvents)
         cell.retweetButton.addTarget(self, action: "retweetOnTap:", forControlEvents: .TouchUpInside)
         cell.likeButton.removeTarget(self, action: nil, forControlEvents: .AllEvents)
@@ -311,9 +326,22 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
             destVC.user = tweet.user
         
         } else if segue.identifier == "detailSegue" {
+            let indexInCells = sender as! Int
+            let tweet = tweets[indexInCells]
+            let destVC = segue.destinationViewController as! DetailViewController
+            destVC.detailTweet = tweet
         
         
-        
+        } else if segue.identifier == "newPostSegue" {
+            if let sender = sender as? UIBarButtonItem {
+                // Do nothing
+            } else {
+                let inReplyTweet = sender as! Tweet
+                let destVC = segue.destinationViewController as! NewPostViewController
+                destVC.inReplyToId = inReplyTweet.tweetId
+                destVC.tweet = inReplyTweet
+            }
+
         }
     }
 

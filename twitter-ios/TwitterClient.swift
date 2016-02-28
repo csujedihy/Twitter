@@ -17,6 +17,7 @@ class TwitterClient: BDBOAuth1SessionManager {
     var loginCompletion: ((user: User?, error: NSError?) -> ())?
     static var userDidLogoutNotification = "UserDidLogout"
     static var userDidPostTweet = "UserDidPostTweet"
+    static var tweetMaxLength = 140
     class var sharedInstance: TwitterClient {
         struct Static {
             static let instance = TwitterClient(baseURL: twitterBaseURL, consumerKey: twitterConsumerKey, consumerSecret: twitterConsumerSecret)
@@ -37,9 +38,14 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
-    func newTweet(content: String, completion: ((error: NSError?)->())?) {
-    //
-        TwitterClient.sharedInstance.POST("1.1/statuses/update.json?status=\(content)", parameters: nil, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
+    func newTweet(content: String, replyId: String?, completion: ((error: NSError?)->())?) {
+        var parameters = [String : AnyObject]()
+        if let replyId = replyId {
+            parameters["in_reply_to_status_id"] = replyId
+        }
+        
+        
+        TwitterClient.sharedInstance.POST("1.1/statuses/update.json?status=\(content)", parameters: parameters, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
             
 //            print("New Tweet Posted!")
             completion?(error: nil)

@@ -30,6 +30,7 @@ class TweetCell: UITableViewCell {
     
     @IBOutlet weak var retweetedNumberLabel: UILabel!
 
+    @IBOutlet weak var replyButton: UIButton!
     
     @IBOutlet weak var likeButton: UIButton!
     
