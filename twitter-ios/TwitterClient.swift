@@ -96,7 +96,40 @@ class TwitterClient: BDBOAuth1SessionManager {
         })
     }
     
+    func follow(userId: String, completion: (error: NSError?)->()) {
+        var parameters = [String : AnyObject]()
+        parameters["user_id"] = String(userId)
+
+        TwitterClient.sharedInstance.POST("1.1/friendships/create.json", parameters: parameters, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
+            
+            print("Followed!")
+            completion(error: nil)
+            
+        }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
+                
+            print("Failed in following!")
+            completion(error: error)
+                
+        })
     
+    }
+    
+    func unfollow(userId: String, completion: (error: NSError?)->()) {
+        var parameters = [String : AnyObject]()
+        parameters["user_id"] = String(userId)
+        TwitterClient.sharedInstance.POST("1.1/friendships/destroy.json", parameters: parameters, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
+            
+            print("Unfollowed!")
+            completion(error: nil)
+            
+            }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
+                
+                print("Failed in unfollowing!")
+                completion(error: error)
+                
+        })
+        
+    }
     
     func loginWithCompletion(completion: (user: User?, error: NSError?) -> ()) {
         loginCompletion = completion
@@ -122,15 +155,41 @@ class TwitterClient: BDBOAuth1SessionManager {
     
     }
     
+    func userHomeTimeline(userId: String?, count: Int?, olderThan: String?, success: ([Tweet]) -> (), failure: (NSError) -> ()) {
+        var parameters = [String : AnyObject]()
+        if let userId = userId {
+            parameters["user_id"] = String(userId)
+        }
+        
+        if let count = count {
+            parameters["count"] = String(count)
+        }
+        
+        if let olderThan = olderThan {
+            parameters["max_id"] = olderThan
+        }
+        
+        TwitterClient.sharedInstance.GET("1.1/statuses/user_timeline.json", parameters: parameters, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in
+            var tweets = Tweet.tweetsWithArray(response as! [NSDictionary])
+            success(tweets)
+            
+            
+            }, failure: { (operation: NSURLSessionDataTask?, error: NSError) -> Void in
+                failure(error)
+                
+        })
+        
+        
+    }
     
-    func homeTimeline(count: Int?, since: Int?, success: ([Tweet]) -> (), failure: (NSError) -> ()) {
+    func homeTimeline(count: Int?, olderThan: String?, success: ([Tweet]) -> (), failure: (NSError) -> ()) {
         var parameters = [String : AnyObject]()
         if let count = count {
             parameters["count"] = String(count)
         }
         
-        if let since = since {
-            parameters["since_id"] = String(since)
+        if let olderThan = olderThan {
+            parameters["max_id"] = olderThan
         }
         
         TwitterClient.sharedInstance.GET("1.1/statuses/home_timeline.json", parameters: parameters, success: { (operation: NSURLSessionDataTask, response: AnyObject?) -> Void in

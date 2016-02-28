@@ -11,7 +11,7 @@ import UIKit
 class TweetsViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate {
 
     var tweets = [Tweet]()
-    var pageOffset = 0
+    var pageOffset: String?
     var refreshControl: UIRefreshControl?
     var isMoreDataLoading = false
     var loadingMoreView:InfiniteScrollActivityView?
@@ -23,12 +23,11 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         
     }
     
-    
 
-    @IBAction func retweetOnTap(sender: AnyObject) {
+    func retweetOnTap(sender: AnyObject) {
         let button = sender as! UIButton
         let index = button.tag
-        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as! TweetCellTableViewCell
+        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as! TweetCell
         
         if let tweetId = cell.tweet?.tweetId {
             if cell.tweet!.retweeted == false {
@@ -45,19 +44,19 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
                         cell.minusOneToRetweetNum()
                     }
                 }
-            
-            
+                
+                
             }
-
+            
         }
-
+    
     }
     
     
-    @IBAction func likeOnTap(sender: AnyObject) {
+    func likeOnTap(sender: AnyObject) {
         let button = sender as! UIButton
         let index = button.tag
-        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as! TweetCellTableViewCell
+        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0)) as! TweetCell
         
         if let tweetId = cell.tweet?.tweetId {
             if cell.tweet!.liked == false {
@@ -75,15 +74,18 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
                     }
                 }
             }
-
+            
         }
-        
+    
     }
     
-    func fetchTweets(count: Int, since: Int) {
-        TwitterClient.sharedInstance.homeTimeline(count, since: since, success: { (tweets: [Tweet]) -> () in
+    
+
+    
+    func fetchTweets(count: Int, since: String?) {
+        TwitterClient.sharedInstance.homeTimeline(count, olderThan: since, success: { (tweets: [Tweet]) -> () in
             self.tweets += tweets
-            self.pageOffset += tweets.count
+            self.pageOffset = tweets.last?.tweetId
             self.tableView.reloadData()
             self.isMoreDataLoading = false
             self.loadingMoreView?.stopAnimating()
@@ -95,10 +97,10 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
     func fetchTweets() {
-        TwitterClient.sharedInstance.homeTimeline(20, since: nil, success: { (tweets: [Tweet]) -> () in
-            self.pageOffset = 0
+        TwitterClient.sharedInstance.homeTimeline(20, olderThan: nil, success: { (tweets: [Tweet]) -> () in
+            self.pageOffset = nil
             self.tweets = tweets
-            self.pageOffset = tweets.count
+            self.pageOffset = tweets.last?.tweetId
             self.tableView.reloadData()
             self.refreshControl?.endRefreshing()
             }) { (error: NSError) -> () in
@@ -131,10 +133,19 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         }
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+        self.navigationController?.navigationBar.setBackgroundImage(UIImage(), forBarMetrics: UIBarMetrics.Default)
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        self.navigationController?.navigationBar.translucent = false
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         tableView.delegate = self
         tableView.dataSource = self
+
+        tableView.registerNib(UINib(nibName: "TweetCell", bundle: nil), forCellReuseIdentifier: "TweetCell")
         
         tableView.estimatedRowHeight = 100
         tableView.rowHeight = UITableViewAutomaticDimension
@@ -170,17 +181,40 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     func refreshControlAction(refreshControl: UIRefreshControl) {
         fetchTweets()
     }
+    
+    //MARK: tableView configuration
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        performSegueWithIdentifier("detailSegue", sender: nil)
+    }
 
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return tweets.count
     }
     
+    func profileTap (sender: AnyObject) {
+        print("tapOnProfile")
+        let position: CGPoint =  sender.locationInView(self.tableView)
+        let indexPath: NSIndexPath = self.tableView.indexPathForRowAtPoint(position)!
+        performSegueWithIdentifier("profileSegue", sender: indexPath.row)
+        
+    }
+    
+    
     
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCellTableViewCell", forIndexPath: indexPath) as! TweetCellTableViewCell
+        let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
+        
+        
         let tweet = tweets[indexPath.row]
         cell.tweet = tweet
+        
+        if cell.userProfileImageVIew.userInteractionEnabled == false {
+            cell.userProfileImageVIew.userInteractionEnabled = true
+            let tapGesture = UITapGestureRecognizer(target: self, action: "profileTap:")
+            cell.userProfileImageVIew.addGestureRecognizer(tapGesture)
+        }
+        
         if let user = tweet.user {
             cell.userProfileImageVIew.setImageWithURL(user.profileImageUrl!)
 
@@ -192,6 +226,15 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
         cell.retweetButton.tag = indexPath.row
         cell.likeButton.tag = indexPath.row
         
+        //MARK: programmatically set button's action
+        
+        cell.retweetButton.removeTarget(self, action: nil, forControlEvents: .AllEvents)
+        cell.retweetButton.addTarget(self, action: "retweetOnTap:", forControlEvents: .TouchUpInside)
+        cell.likeButton.removeTarget(self, action: nil, forControlEvents: .AllEvents)
+        cell.likeButton.addTarget(self, action: "likeOnTap:", forControlEvents: .TouchUpInside)
+
+        
+        cell.userProfileImageVIew.tag = indexPath.row
         
         if let liked = cell.tweet?.liked {
             if liked == true {
@@ -258,14 +301,21 @@ class TweetsViewController: UIViewController, UITableViewDataSource, UITableView
     }
     
 
-    /*
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+        if segue.identifier == "profileSegue" {
+            let indexInCells = sender as! Int
+            let tweet = tweets[indexInCells]
+            let destVC = segue.destinationViewController as! ProfileViewController
+            destVC.user = tweet.user
+        
+        } else if segue.identifier == "detailSegue" {
+        
+        
+        
+        }
     }
-    */
+
 
 }

@@ -25,6 +25,7 @@ class Tweet: NSObject {
     
     init (dictionary: NSDictionary) {
         tweetId = dictionary["id_str"] as? String
+        print(tweetId)
         user = User(dictionary: dictionary["user"] as! NSDictionary)
         if (dictionary["favorited"] as! Int) == 0 {
             liked = false
