@@ -51,7 +51,8 @@ Describe any challenges encountered while building the app.
 
 ## License
    The blured effect in profile view is based on http://www.thinkandbuild.it/implementing-the-twitter-ios-app-ui/
-    Copyright [yyyy] [name of copyright owner]
+   
+    Copyright [2016] [Yi Huang of copyright owner]
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
