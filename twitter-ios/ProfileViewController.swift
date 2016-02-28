@@ -167,6 +167,8 @@ class ProfileViewController: UIViewController, UIScrollViewDelegate, UITableView
         backgroundImageView = UIImageView(frame: header.bounds)
         if let bgImageURL = user.profileBackgroundImageUrl {
             backgroundImageView.setImageWithURL(bgImageURL)
+        } else {
+            backgroundImageView.image = UIImage(named: "default-background")
         }
         
         headerLabel.text = user.name
